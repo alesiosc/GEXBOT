@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+_last_image.txt
+_screenshot.png
+graphify-out/
