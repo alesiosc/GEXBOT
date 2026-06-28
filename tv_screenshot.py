@@ -2,7 +2,7 @@
 Screenshots JUST the last message in #regimebot Discord channel
 in the Trump browser, expands any chart/embed, crops to message area, posts to webhook.
 """
-import asyncio, json, os, sys, urllib.request, websockets, requests, base64
+import asyncio, json, os, sys, urllib.request, websockets, requests, base64, time
 from datetime import datetime, timezone, timedelta
 
 BROWSER_PORT = 9223
@@ -259,13 +259,24 @@ def main():
         return
 
     print(f"Start: {datetime.now()}", flush=True)
-    try:
-        p = asyncio.run(run())
-        if p:
-            post_to_discord(p)
-    finally:
-        if os.path.exists(SCREENSHOT_PATH):
-            os.remove(SCREENSHOT_PATH)
+
+    # Retry loop: keep trying until image arrives (up to ~2 min)
+    max_retries = 12
+    for attempt in range(1, max_retries + 1):
+        try:
+            p = asyncio.run(run())
+            if p:
+                post_to_discord(p)
+                return  # success — done
+            else:
+                print(f"  No new image (attempt {attempt}/{max_retries})", flush=True)
+        except Exception as e:
+            print(f"  Attempt {attempt}/{max_retries} failed: {e}", flush=True)
+
+        if attempt < max_retries:
+            time.sleep(10)
+
+    print("  Max retries reached — will try again next cycle", flush=True)
 
 
 if __name__ == "__main__":

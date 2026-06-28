@@ -1,0 +1,3 @@
+Paste ZULU Levels here. Save the file — auto-injected into TradingView.
+
+Format: NQ - Zulu Vol Lo 29102.32; Zulu Vol Hi 29161.4; Zulu OI Lo 28904.35; Zulu OI Hi 29696.25; ES - Zulu Vol Lo 7397.7; Zulu Vol Hi 7412.72; Zulu OI Lo 7347.38; Zulu OI Hi 7548.68

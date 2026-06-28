@@ -1,5 +1,12 @@
 __pycache__/
 *.pyc
 _last_image.txt
+_last_gamma.txt
+_last_zulu.txt
+_last_zero_gamma.txt
+_zulu_state.json
+_zulu_paste_hash.txt
 _screenshot.png
+_gamma.png
+_zero_gamma.png
 graphify-out/
