@@ -64,7 +64,7 @@ async def paste_via_dialog(new_text):
             (() => {
                 const indicators = document.querySelectorAll('[class*="legend"] [class*="name"], [class*="legend"] [class*="title"]');
                 for (const ind of indicators) {
-                    if (ind.textContent.includes('v13.6') || ind.textContent.includes('Friday 13th')) {
+                    if (ind.textContent.includes('v13.8') || ind.textContent.includes('Friday 13th')) {
                         ind.click();
                         return 'clicked legend';
                     }

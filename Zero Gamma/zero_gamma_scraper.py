@@ -167,6 +167,15 @@ def post_to_discord(path):
 
 
 def main():
+    # Prevent duplicate instances
+    try:
+        from pid_lock import PIDLock
+        lock = PIDLock("zero_gamma_scraper")
+        if not lock.acquire():
+            return
+    except ImportError:
+        pass
+
     print(f"Zero Gamma watcher started at {datetime.now()}", flush=True)
 
     # Align first run to next :13 second mark

@@ -254,29 +254,73 @@ def post_to_discord(path):
 
 
 def main():
-    if not is_market_hours_est():
-        print("Outside hours — skip", flush=True)
-        return
+    # Prevent duplicate instances
+    try:
+        from pid_lock import PIDLock
+        lock = PIDLock("regimebot_screenshot")
+        if not lock.acquire():
+            return
+    except ImportError:
+        pass
 
-    print(f"Start: {datetime.now()}", flush=True)
+    print(f"Regimebot watcher started at {datetime.now()}", flush=True)
 
-    # Retry loop: keep trying until image arrives (up to ~2 min)
-    max_retries = 12
-    for attempt in range(1, max_retries + 1):
+    # Align first run to next :00 second mark (check every 15 min)
+    now = datetime.now()
+    current_sec = now.second + now.microsecond / 1_000_000
+    delay = (900 - current_sec % 900) % 900
+    print(f"  First check in {delay:.1f}s (aligning to :00 of 15min cycle)", flush=True)
+    time.sleep(delay)
+
+    first_run = True
+
+    while True:
         try:
-            p = asyncio.run(run())
-            if p:
-                post_to_discord(p)
-                return  # success — done
-            else:
-                print(f"  No new image (attempt {attempt}/{max_retries})", flush=True)
+            if not is_market_hours_est():
+                # Sleep until next market open (9:31)
+                now_utc = datetime.now(timezone.utc)
+                est = now_utc - timedelta(hours=4 if 4 <= now_utc.month <= 10 else 5)
+                tomorrow = est + timedelta(days=1)
+                next_open = tomorrow.replace(hour=9, minute=31, second=0, microsecond=0)
+                today_open = est.replace(hour=9, minute=31, second=0, microsecond=0)
+                if est < today_open:
+                    next_open = today_open
+                sleep_s = (next_open - est).total_seconds()
+                print(f"  Outside hours — next check at {next_open.strftime('%a %H:%M:%S')}", flush=True)
+                time.sleep(min(sleep_s, 600))
+                continue
+
+            print(f"Check: {datetime.now()}", flush=True)
+
+            # Retry loop: keep trying until image arrives (up to ~2 min)
+            max_retries = 12
+            result = None
+            for attempt in range(1, max_retries + 1):
+                try:
+                    p = asyncio.run(run())
+                    if p:
+                        post_to_discord(p)
+                        result = p
+                        break
+                    else:
+                        print(f"  No new image (attempt {attempt}/{max_retries})", flush=True)
+                except Exception as e:
+                    print(f"  Attempt {attempt}/{max_retries} failed: {e}", flush=True)
+
+                if attempt < max_retries:
+                    time.sleep(10)
+
+            if not result:
+                print("  Max retries reached — will try again next cycle", flush=True)
+
         except Exception as e:
-            print(f"  Attempt {attempt}/{max_retries} failed: {e}", flush=True)
+            print(f"  ERROR: {e}", flush=True)
 
-        if attempt < max_retries:
-            time.sleep(10)
-
-    print("  Max retries reached — will try again next cycle", flush=True)
+        # Sleep to next :00 mark (15 min cycle)
+        now = datetime.now()
+        current_sec = now.second + now.microsecond / 1_000_000
+        delay = (900 - current_sec % 900) % 900
+        time.sleep(max(delay, 1))
 
 
 if __name__ == "__main__":
