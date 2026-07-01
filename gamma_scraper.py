@@ -29,7 +29,7 @@ def ensure_browser():
             f"--remote-debugging-port={BROWSER_PORT}",
             f"--user-data-dir={USER_DATA_DIR}",
             "--restore-last-session",
-        ], shell=False)
+        ], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         print(f"  Launched Chrome on port {BROWSER_PORT}", flush=True)
         # Wait for it to come up AND restore session
         for _ in range(30):
@@ -48,7 +48,7 @@ def ensure_browser():
         # Skips tabs already opened by daemons (Discord, TradingView).
         import os
         script_path = os.path.join(os.path.dirname(__file__), "..", "open_trump_tabs.py")
-        subprocess.Popen([sys.executable, script_path], shell=False)
+        subprocess.Popen([sys.executable, script_path], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         print(f"  Launched tab re-opener: {script_path}", flush=True)
 
         return True
