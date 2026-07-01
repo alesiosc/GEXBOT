@@ -29,6 +29,7 @@ def ensure_browser():
             f"--remote-debugging-port={BROWSER_PORT}",
             f"--user-data-dir={USER_DATA_DIR}",
             "--restore-last-session",
+            "--disable-features=ChromeWhatsNewUI",
         ], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         print(f"  Launched Chrome on port {BROWSER_PORT}", flush=True)
         # Wait for it to come up AND restore session
