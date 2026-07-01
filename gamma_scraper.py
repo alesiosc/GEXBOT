@@ -48,7 +48,7 @@ def ensure_browser():
         # Skips tabs already opened by daemons (Discord, TradingView).
         import os
         script_path = os.path.join(os.path.dirname(__file__), "..", "open_trump_tabs.py")
-        subprocess.Popen([sys.executable, script_path], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+        subprocess.Popen([sys.executable.replace("python.exe", "pythonw.exe"), script_path], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         print(f"  Launched tab re-opener: {script_path}", flush=True)
 
         return True
